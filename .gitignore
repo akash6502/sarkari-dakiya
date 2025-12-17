@@ -1,0 +1,19 @@
+static/
+cache/
+caches/
+*.cache
+# Django local cache files
+*.db
+*.sqlite3
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Celery / background task cache
+celerybeat-schedule
+celerybeat-schedule.db
+
+# Django static & media (optional, if generated)
+staticfiles/
+media/
