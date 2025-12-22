@@ -51,6 +51,7 @@ export function JobCard({
     }
   };
 
+
   const daysAgo = Math.floor((new Date().getTime() - new Date(job.postedDate).getTime()) / (1000 * 60 * 60 * 24));
 
   return (

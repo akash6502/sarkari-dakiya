@@ -1,12 +1,15 @@
 import { Bell, Menu, Bookmark, LogOut, PlusCircle, User } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface HeaderProps {
   user: { name: string; email: string; role: 'admin' | 'user' } | null;
   onLogout: () => void;
   onOpenAdminPanel?: () => void;
+  onAdminSignIn?: () => void;
 }
 
-export function Header({ user, onLogout, onOpenAdminPanel }: HeaderProps) {
+export function Header({ user, onLogout, onOpenAdminPanel, onAdminSignIn }: HeaderProps) {
+  const navigate = useNavigate();
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
       {/* Top Bar */}
@@ -20,9 +23,18 @@ export function Header({ user, onLogout, onOpenAdminPanel }: HeaderProps) {
               <h1 className="text-xl">Sarkari Dakiya</h1>
               <p className="text-xs text-blue-100">Your Gateway to Government Jobs</p>
             </div>
+            <div className="hidden md:flex items-center ml-4">
+              <button
+                onClick={() => navigate('/trending')}
+                className="text-sm text-white/90 hover:underline"
+                aria-label="Trending jobs"
+              >
+                Trending
+              </button>
+            </div>
           </div>
           <div className="flex items-center gap-4">
-            {user?.role === 'admin' && (
+            {user?.role === 'admin' ? (
               <button 
                 onClick={onOpenAdminPanel}
                 className="flex items-center gap-2 px-4 py-2 bg-white text-blue-700 rounded-lg hover:bg-blue-50 transition-colors text-sm"
@@ -30,13 +42,22 @@ export function Header({ user, onLogout, onOpenAdminPanel }: HeaderProps) {
                 <PlusCircle className="w-4 h-4" />
                 <span className="hidden md:inline">Post Job</span>
               </button>
+            ) : (
+              <button
+                onClick={onAdminSignIn}
+                className="flex items-center gap-2 px-4 py-2 bg-white text-purple-700 rounded-lg hover:bg-purple-50 transition-colors text-sm"
+                title="Sign in as admin to access admin features"
+              >
+                <PlusCircle className="w-4 h-4" />
+                <span className="hidden md:inline">Admin Sign In</span>
+              </button>
             )}
             <button className="p-2 hover:bg-blue-600 rounded-lg transition-colors">
               <Bell className="w-5 h-5" />
             </button>
             <div className="flex items-center gap-2 px-3 py-1 bg-blue-600 rounded-lg">
               <User className="w-4 h-4" />
-              <span className="text-sm hidden md:inline">{user?.name || 'User'}</span>
+              <span className="text-sm hidden md:inline">{user?.name}</span>
             </div>
             <button 
               onClick={onLogout}

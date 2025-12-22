@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { LogIn, UserPlus } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 interface LoginPageProps {
-  onLogin: (email: string, password: string, role: 'admin' | 'user') => void;
-  onSignup: (name: string, email: string, password: string) => void;
+  onLogin: (email: string, password: string, role: 'admin' | 'user') => Promise<boolean>;
+  onSignup: (name: string, email: string, password: string) => Promise<boolean>;
 }
 
 export function LoginPage({ onLogin, onSignup }: LoginPageProps) {
@@ -12,40 +13,66 @@ export function LoginPage({ onLogin, onSignup }: LoginPageProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<'admin' | 'user'>('user');
+  const [adminPrompt, setAdminPrompt] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  const next = params.get('next');
+  const as = params.get('as');
+
+  useEffect(() => {
+    if (as === 'admin') {
+      setIsLogin(true);
+      setRole('admin');
+      setAdminPrompt('Sign in as an admin to access admin features.');
+    }
+  }, [as]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isLogin) {
-      onLogin(email, password, role);
+      const success = await onLogin(email, password, role);
+      if (success) {
+        navigate(next ?? '/dashboard');
+      }
     } else {
-      onSignup(name, email, password);
+      const success = await onSignup(name, email, password);
+      if (success) {
+        // After signup, switch to login form
+        setIsLogin(true);
+        setName('');
+        setPassword('');
+      }
     }
   };
 
-  // Quick login buttons for demo
-  const quickLogin = (demoRole: 'admin' | 'user') => {
-    if (demoRole === 'admin') {
-      onLogin('admin@sarkaridakiya.in', 'admin123', 'admin');
-    } else {
-      onLogin('user@example.com', 'user123', 'user');
-    }
-  };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 flex items-center justify-center px-4 py-8">
-      <div className="max-w-md w-full">
+    <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 flex items-center justify-center px-4 py-4 sm:py-8">
+      <div className="max-w-md w-full mx-3 sm:mx-0">
         {/* Logo and Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-2xl shadow-lg mb-4">
-            <span className="text-5xl">📬</span>
+        <div className={`text-center ${isLogin ? 'mb-8' : 'mb-4'}`}>
+          <div className={`inline-flex items-center gap-3 justify-center ${isLogin ? 'mb-3' : 'mb-2'}`}>
+            <div className="w-12 h-12 sm:w-14 sm:h-14 bg-white rounded-2xl shadow-lg flex items-center justify-center">
+              <span className="text-3xl sm:text-4xl">📬</span>
+            </div>
+            <div className="text-left">
+              <h1 className="text-2xl sm:text-3xl text-white -mb-1">Sarkari Dakiya</h1>
+              <p className="text-blue-100 text-sm">Your Gateway to Government Jobs</p>
+            </div>
           </div>
-          <h1 className="text-4xl text-white mb-2">Sarkari Dakiya</h1>
-          <p className="text-blue-100">Your Gateway to Government Jobs</p>
         </div>
 
         {/* Login/Signup Form */}
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
-          <div className="flex gap-2 mb-6">
+        <div className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 max-h-[86vh] overflow-auto">
+          {adminPrompt && (
+            <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 p-3 rounded mb-4 text-sm">
+              {adminPrompt}
+            </div>
+          )}
+
+          <div className={`flex gap-2 ${isLogin ? 'mb-6' : 'mb-4'}`}>
             <button
               onClick={() => setIsLogin(true)}
               className={`flex-1 py-2 rounded-lg transition-colors ${
@@ -68,7 +95,7 @@ export function LoginPage({ onLogin, onSignup }: LoginPageProps) {
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className={`space-y-3 sm:space-y-4 ${isLogin ? '' : 'sm:space-y-3'}`}>
             {!isLogin && (
               <div>
                 <label className="block text-sm text-gray-700 mb-2">Full Name</label>
@@ -90,7 +117,7 @@ export function LoginPage({ onLogin, onSignup }: LoginPageProps) {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-4 ${isLogin ? 'py-3' : 'py-2.5'} border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 required
               />
             </div>
@@ -102,7 +129,7 @@ export function LoginPage({ onLogin, onSignup }: LoginPageProps) {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Enter your password"
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-4 ${isLogin ? 'py-3' : 'py-2.5'} border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 required
               />
             </div>
@@ -137,7 +164,7 @@ export function LoginPage({ onLogin, onSignup }: LoginPageProps) {
 
             <button
               type="submit"
-              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+              className={`w-full bg-blue-600 text-white ${isLogin ? 'py-2.5 sm:py-3' : 'py-2 sm:py-2.5'} rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2`}
             >
               {isLogin ? (
                 <>
@@ -152,28 +179,9 @@ export function LoginPage({ onLogin, onSignup }: LoginPageProps) {
               )}
             </button>
           </form>
-
-          {/* Demo Login Buttons */}
-          <div className="mt-6 pt-6 border-t border-gray-200">
-            <p className="text-xs text-gray-500 text-center mb-3">Quick Demo Login:</p>
-            <div className="flex gap-2">
-              <button
-                onClick={() => quickLogin('user')}
-                className="flex-1 py-2 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition-colors text-sm"
-              >
-                Login as User
-              </button>
-              <button
-                onClick={() => quickLogin('admin')}
-                className="flex-1 py-2 bg-purple-50 text-purple-700 rounded-lg hover:bg-purple-100 transition-colors text-sm"
-              >
-                Login as Admin
-              </button>
-            </div>
-          </div>
         </div>
 
-        <p className="text-center text-blue-100 text-sm mt-6">
+        <p className={`text-center text-blue-100 text-sm ${isLogin ? 'mt-4' : 'mt-2'}`}>
           © 2025 Sarkari Dakiya - All Rights Reserved
         </p>
       </div>
