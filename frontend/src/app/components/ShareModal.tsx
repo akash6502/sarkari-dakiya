@@ -48,7 +48,11 @@ export function ShareModal({ isOpen, onClose, jobTitle }: ShareModalProps) {
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(shareUrl);
-    alert('Link copied to clipboard!');
+    // Use toast notification instead of alert
+    (async () => {
+      const { toast } = await import('sonner');
+      toast.success('Link copied to clipboard!');
+    })();
   };
 
   return (

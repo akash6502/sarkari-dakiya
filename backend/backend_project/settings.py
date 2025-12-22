@@ -40,11 +40,12 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'core',
+    'rest_framework_simplejwt.token_blacklist',
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -123,6 +124,17 @@ STATIC_URL = 'static/'
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
+    "http://localhost:5173",
+    "http://localhost:5174",
     "http://127.0.0.1:3000",
     # Add your production domain here later (e.g., "https://myblog.com")
 ]
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+CORS_ALLOW_CREDENTIALS = True

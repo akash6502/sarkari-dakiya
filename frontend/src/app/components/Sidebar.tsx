@@ -1,5 +1,6 @@
 import { Search, Filter, Bookmark, TrendingUp, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 interface SidebarProps {
   onSearch: (query: string) => void;
@@ -13,6 +14,7 @@ interface SidebarProps {
 
 export function Sidebar({ onSearch, onFilterChange, selectedFilter, onViewChange, currentView, isCollapsed, onToggleCollapse }: SidebarProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const navigate = useNavigate();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,7 +55,12 @@ export function Sidebar({ onSearch, onFilterChange, selectedFilter, onViewChange
             return (
               <button
                 key={view.id}
-                onClick={() => onViewChange(view.id)}
+                onClick={() => {
+                  onViewChange(view.id);
+                  if (view.id === 'bookmarked') navigate('/bookmarks');
+                  else if (view.id === 'trending') navigate('/trending');
+                  else navigate('/dashboard');
+                }}
                 className={`p-3 rounded-lg transition-colors ${
                   currentView === view.id
                     ? 'bg-blue-50 text-blue-700'
@@ -95,7 +102,13 @@ export function Sidebar({ onSearch, onFilterChange, selectedFilter, onViewChange
                 return (
                   <button
                     key={view.id}
-                    onClick={() => onViewChange(view.id)}
+                    onClick={() => {
+                      onViewChange(view.id);
+                      // also navigate to route for better UX
+                      if (view.id === 'bookmarked') navigate('/bookmarks');
+                      else if (view.id === 'trending') navigate('/trending');
+                      else navigate('/dashboard');
+                    }}
                     className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors text-sm ${
                       currentView === view.id
                         ? 'bg-blue-50 text-blue-700'
